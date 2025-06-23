@@ -62,7 +62,12 @@ class EventBase(BaseModel):
     description: Optional[str] = Field(
         None, description="Description of the event", example="An evening with tabletop games"
     )
-    date: date = Field(..., description="Date of the event", example="2024-07-13")
+    event_date: date = Field(
+        ...,
+        alias="date",
+        description="Date of the event",
+        example="2024-07-13",
+    )
     location: str = Field(..., description="Location of the event", example="Central Hall")
 
 
@@ -77,8 +82,8 @@ class EventUpdate(BaseModel):
     description: Optional[str] = Field(
         None, description="Description of the event"
     )
-    date: Optional[date] = Field(
-        None, description="Date of the event"
+    event_date: Optional[date] = Field(
+        None, alias="date", description="Date of the event"
     )
     location: Optional[str] = Field(
         None, description="Location of the event"
@@ -116,7 +121,7 @@ def create_event(event: EventCreate):
         (
             event.name,
             event.description,
-            event.date.isoformat(),
+            event.event_date.isoformat(),
             event.location,
         ),
     )
@@ -150,7 +155,7 @@ def list_events():
                 id=row["id"],
                 name=row["name"],
                 description=row["description"],
-                date=date_obj,
+                event_date=date_obj,
                 location=row["location"],
             )
         )
@@ -179,7 +184,7 @@ def get_event(event_id: int):
         id=row["id"],
         name=row["name"],
         description=row["description"],
-        date=datetime.strptime(row["date"], "%Y-%m-%d").date(),
+        event_date=datetime.strptime(row["date"], "%Y-%m-%d").date(),
         location=row["location"],
     )
 
@@ -201,7 +206,7 @@ def update_event(event_id: int, event: EventCreate):
         (
             event.name,
             event.description,
-            event.date.isoformat(),
+            event.event_date.isoformat(),
             event.location,
             event_id,
         ),
@@ -235,39 +240,39 @@ def partial_update_event(event_id: int, event: EventUpdate):
     updated_data = {
         **dict(row),
         **{
-            k: v
-            for k, v in event.dict(exclude_unset=True).items()
+            (k if k != "date" else "event_date"): v
+            for k, v in event.dict(exclude_unset=True, by_alias=True).items()
             if v is not None
         },
     }
     cur = conn.cursor()
-    updated_date = (
-        updated_data["date"]
-        if isinstance(updated_data["date"], str)
-        else updated_data["date"].isoformat()
+    updated_event_date = (
+        updated_data["event_date"]
+        if isinstance(updated_data["event_date"], str)
+        else updated_data["event_date"].isoformat()
     )
     cur.execute(
         "UPDATE events SET name = ?, description = ?, date = ?, location = ? WHERE id = ?",
         (
             updated_data["name"],
             updated_data["description"],
-            updated_date,
+            updated_event_date,
             updated_data["location"],
             event_id,
         ),
     )
     conn.commit()
     conn.close()
-    date_val = (
-        datetime.strptime(updated_data["date"], "%Y-%m-%d").date()
-        if isinstance(updated_data["date"], str)
-        else updated_data["date"]
+    event_date_val = (
+        datetime.strptime(updated_data["event_date"], "%Y-%m-%d").date()
+        if isinstance(updated_data["event_date"], str)
+        else updated_data["event_date"]
     )
     return Event(
         id=event_id,
         name=updated_data["name"],
         description=updated_data["description"],
-        date=date_val,
+        event_date=event_date_val,
         location=updated_data["location"],
     )
 
