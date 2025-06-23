@@ -1,0 +1,5 @@
+{
+  "task_description": "{'description': 'An event manager API providing backend functionality for event management.', 'containers': [{'container_name': 'event_manager_api', 'platform': 'backend', 'framework': 'fastapi', 'description': 'Backend container exposing event management APIs.', 'interfaces': 'RESTful API endpoints for event management (CRUD operations).', 'relative_path': 'event_manager_api_workspace', 'dependencies': [], 'container_type': 'backend', 'container_details': 'Handles business logic and data persistence for event management.'}], '3rd_party_services': [], 'figma_components': '', 'manifest_path': '/home/kavia/workspace/code-generation/.project_manifest.yaml'}",
+  "tasks": {},
+  "next_task_id": 1
+}
